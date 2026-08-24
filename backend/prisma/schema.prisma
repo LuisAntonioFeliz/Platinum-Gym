@@ -1,0 +1,83 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Sucursales de Platinum Gym (Bonao, Santo Domingo, Santiago)
+model Branch {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique // Ej: Bonao, Santo Domingo, Santiago
+  address   String
+  phone     String?
+  schedule  String?
+  adminId   Int?
+  admin     Admin?    // Un administrador por sucursal
+  users     User[]    // Usuarios inscritos seleccionando esta sucursal
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// 2. Administradores de cada sucursal
+model Admin {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  branchId  Int      @unique // Relación uno a uno con la sucursal
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 3. Planes del gimnasio (Básico y Premium)
+model Plan {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // Plan Básico / Plan Premium
+  price       Float    // 900.00 / 1200.00
+  description String?
+  users       User[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 4. Usuarios / Clientes inscritos según el formulario
+model User {
+  id           Int         @id @default(autoincrement())
+  name         String      // Campo "Nombre"
+  sex          String      // Campo "Sexo"
+  address      String      // Campo "Direccion"
+  phone        String      // Campo "Teléfono"
+  email        String      @unique // Campo "E-mail"
+  
+  branchId     Int         // Sucursal seleccionada
+  branch       Branch      @relation(fields: [branchId], references: [id])
+  
+  planId       Int         // Plan seleccionado
+  plan         Plan        @relation(fields: [planId], references: [id])
+  
+  payments     Payment[]   // Historial de pagos de la pasarela
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+// 5. Pasarela de Pago (Registro de transacciones)
+model Payment {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Float    // Monto pagado
+  currency      String   @default("DOP")
+  status        String   // Ej: PENDING, COMPLETED, FAILED
+  providerTxId  String?  // ID de transacción de la pasarela externa (Stripe, PayPal, etc.)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
