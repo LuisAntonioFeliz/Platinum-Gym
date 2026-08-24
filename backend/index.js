@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors'
-
-require('dotenv').config();
+import 'dotenv/config';
 
 const prisma = require('./db'); // Importamos la instancia desde db.js
 
