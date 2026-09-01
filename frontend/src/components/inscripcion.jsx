@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { registrarCliente } from "../../services/clientes";
+//import { registrarCliente } from "../../services/clientes";
 
 const FormInscripcion = () => {
   const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ const FormInscripcion = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  /*const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
     setMensajeEstado({ tipo: "", texto: "" });
@@ -98,6 +98,63 @@ const FormInscripcion = () => {
         tipo: "error",
         texto:
           error.response?.data?.error || "Ocurrió un error en el registro.",
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };*/
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setCargando(true);
+    setMensajeEstado({ tipo: "", texto: "" });
+
+    if (
+      !formData.name ||
+      !formData.sex ||
+      !formData.address ||
+      !formData.phone ||
+      !formData.email ||
+      !formData.branchId ||
+      !formData.planId
+    ) {
+      setMensajeEstado({
+        tipo: "error",
+        texto:
+          "Por favor, complete todos los campos obligatorios marcados con *",
+      });
+      setCargando(false);
+      return;
+    }
+
+    try {
+      // --- MODO SIMULACIÓN TEMPORAL ---
+      // Simulamos una pequeña espera de red (1 segundo)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Si quieres probar tu servicio real en el futuro, aquí iría el axios.post
+      // const resultado = await registrarCliente({...});
+
+      setCargando(false);
+      setMensajeEstado({
+        tipo: "success",
+        texto: "¡Inscripción realizada con éxito! (Modo demostrativo)",
+      });
+
+      setFormData({
+        name: "",
+        sex: "",
+        address: "",
+        phone: "",
+        email: "",
+        branchId: "",
+        planId: "",
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setCargando(false);
+      setMensajeEstado({
+        tipo: "error",
+        texto: "Ocurrió un error en el registro.",
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
