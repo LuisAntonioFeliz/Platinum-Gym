@@ -7,7 +7,7 @@ API REST desarrollada con **Node.js**, **Express**, **Prisma ORM** y **MySQL** p
 ## 🚀 Tecnologías y Herramientas
 * **Node.js** & **Express** (Servidor y rutas)
 * **Prisma ORM** (Gestión y consultas a base de datos)
-* **MySQL** (Base de datos relacional)
+* **PostgreSQL** (Base de datos relacional)
 * **CORS** & **Dotenv** (Seguridad y variables de entorno)
 
 ---

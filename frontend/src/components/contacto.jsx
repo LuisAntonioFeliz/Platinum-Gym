@@ -1,5 +1,21 @@
 import { useState } from "react";
-import { enviarContacto } from "./../../services/contacto";
+//import { enviarContacto } from "./../../services/contacto";
+
+// --- Estilos (solo presentación) ---
+const campoBase =
+    "w-full border bg-transparent px-5 text-[16px] text-white placeholder:text-[#999999] transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+const bordeNormal = "border-white/40 focus:border-white";
+const bordeError = "border-rojo";
+const etiquetaClass =
+    "text-[14px] font-medium uppercase tracking-[0.1em] text-white";
+
+function MensajeError({ id, children }) {
+    return (
+        <p id={id} className="m-0 text-[14px] leading-[1.4] text-white">
+            {children}
+        </p>
+    );
+}
 
 function FormContacto() {
     const [nombre, setNombre] = useState("");
@@ -24,10 +40,26 @@ function FormContacto() {
 
         if (Object.keys(nuevosErrores).length === 0) {
             try {
-                const res = await enviarContacto({ nombre, email, mensaje });
-                setStatus(res.message); // mensaje del backend
-            } catch (error) {
-                setStatus("Error al enviar el mensaje: " + (error.message || error));
+                // --- MODO SIMULACIÓN ---
+                // Simulamos una pequeña espera de red (1 segundo)
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+
+                setStatus(
+                    "¡Mensaje enviado con éxito! Nos pondremos en contacto pronto.",
+                );
+
+                // Limpiar los campos del formulario
+                setNombre("");
+                setEmail("");
+                setMensaje("");
+                setErrores({});
+
+                // Ocultar el mensaje automáticamente después de 5 segundos
+                setTimeout(() => {
+                    setStatus("");
+                }, 5000);
+            } catch {
+                setStatus("Error al enviar el mensaje. Inténtalo de nuevo.");
             }
         }
     };
@@ -35,92 +67,139 @@ function FormContacto() {
     return (
         <section
             id="contacto"
-            className="mx-4 sm:mx-auto my-16 max-w-[600px] rounded-xl border-2 border-azul bg-white p-6 sm:p-8 shadow-[0_0_10px_rgba(0,0,0,0.05)] scroll-mt-[90px]"
+            aria-labelledby="contacto-titulo"
+            className="scroll-mt-20 bg-black text-white"
         >
-            <form
-                id="formContacto"
-                onSubmit={handleSubmit}
-                className="flex flex-col gap-6"
-            >
-                <h2 className="mb-2 text-center text-2xl sm:text-[28px] font-semibold text-azul">
-                    Contáctanos para más información
-                </h2>
-                <span className="block p-0 text-center text-[14px] font-semibold text-rojo">
-                    * Campo obligatorio
-                </span>
-
-                {/* Campo Nombre */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-                    <label
-                        htmlFor="nombreContacto"
-                        className="text-left sm:text-center text-[16px] font-normal text-black"
+            <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+                <header>
+                    <h2
+                        id="contacto-titulo"
+                        className="text-[clamp(2.25rem,5vw,3.125rem)] font-normal leading-[0.95] tracking-[-0.04em] [text-wrap:balance]"
                     >
-                        Nombre <span className="text-rojo">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        id="nombreContacto"
-                        placeholder="Nombre..."
-                        value={nombre}
-                        onChange={(e) => setNombre(e.target.value)}
-                        className={`w-full sm:w-[320px] h-[40px] rounded border-2 border-azul bg-white px-3 text-[16px] font-normal text-black focus:outline focus:outline-2 focus:outline-azul focus:outline-offset-2 ${errores.nombre ? "border-rojo" : ""
-                            }`}
-                    />
-                </div>
+                        Contáctanos para más información
+                    </h2>
+                    <p className="mt-6 max-w-[520px] text-[19px] leading-[1.35] tracking-[-0.03em] text-[#999999]">
+                        Déjanos tu mensaje y tu correo para recibir información sobre planes
+                        y sucursales.
+                    </p>
+                </header>
 
-                {/* Campo Email */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-                    <label
-                        htmlFor="emailContacto"
-                        className="text-left sm:text-center text-[16px] font-normal text-black"
+                <div>
+                    <form
+                        id="formContacto"
+                        onSubmit={handleSubmit}
+                        aria-labelledby="contacto-titulo"
+                        className="flex flex-col gap-6"
                     >
-                        E-mail <span className="text-rojo">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        id="emailContacto"
-                        placeholder="ejemplo@correo.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={`w-full sm:w-[320px] h-[40px] rounded border-2 border-azul bg-white px-3 text-[16px] font-normal text-black focus:outline focus:outline-2 focus:outline-azul focus:outline-offset-2 ${errores.email ? "border-rojo" : ""
-                            }`}
-                    />
-                </div>
+                        <p className="m-0 text-[14px] font-medium uppercase tracking-[0.1em] text-[#999999]">
+                            <span className="text-rojo" aria-hidden="true">
+                                *
+                            </span>{" "}
+                            Campo obligatorio
+                        </p>
 
-                {/* Campo Mensaje */}
-                <div className="flex flex-col gap-2">
-                    <label
-                        htmlFor="mensaje"
-                        className="text-left text-[16px] font-normal text-black"
+                        {/* Campo Nombre */}
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="nombreContacto" className={etiquetaClass}>
+                                Nombre{" "}
+                                <span className="text-rojo" aria-hidden="true">
+                                    *
+                                </span>
+                            </label>
+                            <input
+                                type="text"
+                                id="nombreContacto"
+                                placeholder="Nombre..."
+                                autoComplete="name"
+                                value={nombre}
+                                onChange={(e) => setNombre(e.target.value)}
+                                aria-invalid={Boolean(errores.nombre)}
+                                aria-describedby={
+                                    errores.nombre ? "nombreContacto-error" : undefined
+                                }
+                                className={`h-12 rounded-full ${campoBase} ${errores.nombre ? bordeError : bordeNormal
+                                    }`}
+                            />
+                            {errores.nombre && (
+                                <MensajeError id="nombreContacto-error">
+                                    Escribe tu nombre.
+                                </MensajeError>
+                            )}
+                        </div>
+
+                        {/* Campo Email */}
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="emailContacto" className={etiquetaClass}>
+                                E-mail{" "}
+                                <span className="text-rojo" aria-hidden="true">
+                                    *
+                                </span>
+                            </label>
+                            <input
+                                type="email"
+                                id="emailContacto"
+                                placeholder="ejemplo@correo.com"
+                                autoComplete="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                aria-invalid={Boolean(errores.email)}
+                                aria-describedby={
+                                    errores.email ? "emailContacto-error" : undefined
+                                }
+                                className={`h-12 rounded-full ${campoBase} ${errores.email ? bordeError : bordeNormal
+                                    }`}
+                            />
+                            {errores.email && (
+                                <MensajeError id="emailContacto-error">
+                                    Escribe un correo válido.
+                                </MensajeError>
+                            )}
+                        </div>
+
+                        {/* Campo Mensaje */}
+                        <div className="flex flex-col gap-2">
+                            <label htmlFor="mensaje" className={etiquetaClass}>
+                                Mensaje{" "}
+                                <span className="text-rojo" aria-hidden="true">
+                                    *
+                                </span>
+                            </label>
+                            <textarea
+                                id="mensaje"
+                                placeholder="Escriba su mensaje..."
+                                value={mensaje}
+                                onChange={(e) => setMensaje(e.target.value)}
+                                aria-invalid={Boolean(errores.mensaje)}
+                                aria-describedby={errores.mensaje ? "mensaje-error" : undefined}
+                                className={`min-h-[160px] resize-y rounded-3xl py-4 ${campoBase} ${errores.mensaje ? bordeError : bordeNormal
+                                    }`}
+                            ></textarea>
+                            {errores.mensaje && (
+                                <MensajeError id="mensaje-error">
+                                    Escribe tu mensaje.
+                                </MensajeError>
+                            )}
+                        </div>
+
+                        {/* Botón de envío */}
+                        <div className="mt-2 flex">
+                            <button
+                                type="submit"
+                                className="inline-flex w-full items-center justify-center rounded-full bg-azul px-10 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white transition-colors duration-200 hover:bg-[#1c54b2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:w-auto"
+                            >
+                                Enviar
+                            </button>
+                        </div>
+                    </form>
+
+                    <p
+                        role="status"
+                        className="m-0 mt-6 min-h-[1.5rem] text-[16px] leading-[1.5] text-white"
                     >
-                        Mensaje <span className="text-rojo">*</span>
-                    </label>
-                    <textarea
-                        id="mensaje"
-                        placeholder="Escriba su mensaje..."
-                        value={mensaje}
-                        onChange={(e) => setMensaje(e.target.value)}
-                        className={`h-[150px] w-full rounded border-2 border-azul bg-white p-3 text-[16px] font-normal text-black focus:outline focus:outline-2 focus:outline-azul focus:outline-offset-2 ${errores.mensaje ? "border-rojo" : ""
-                            }`}
-                    ></textarea>
+                        {status}
+                    </p>
                 </div>
-
-                {/* Botón de envío */}
-                <div className="flex justify-center mt-2">
-                    <button
-                        type="submit"
-                        className="w-full sm:w-auto rounded-md border-0 bg-azul px-8 py-3 text-center text-[18px] sm:text-[20px] font-bold text-white hover:bg-[#1c54b2] focus:outline focus:outline-2 focus:outline-azul focus:outline-offset-2 transition duration-200 shadow-md"
-                    >
-                        Enviar
-                    </button>
-                </div>
-            </form>
-
-            {status && (
-                <p className="mt-4 text-center text-sm font-medium text-zinc-700">
-                    {status}
-                </p>
-            )}
+            </div>
         </section>
     );
 }

@@ -12,13 +12,15 @@ function App() {
   return (
     <>
       <Header />
-      <Hero />
-      <Planes />
-      <Testimonios />
-      <Sucursales />
-      <FormInscripcion />
-      <FAQ />
-      <FormContacto />
+      <main>
+        <Hero />
+        <Planes />
+        <Testimonios />
+        <Sucursales />
+        <FormInscripcion />
+        <FAQ />
+        <FormContacto />
+      </main>
       <Footer />
     </>
   );

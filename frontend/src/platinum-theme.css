@@ -1,0 +1,30 @@
+/*
+  Platinum Gym — base tipográfica.
+  Importar UNA vez, en main.jsx:  import "./platinum-theme.css";
+  (@import debe ir primero en este archivo; por eso no va dentro de tu CSS de Tailwind.)
+*/
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+
+:root {
+  /* Montserrat sustituye a Proxima Nova, según la guía de diseño */
+  --font-platinum: "Montserrat", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-platinum);
+  background-color: #ffffff;
+  color: #000000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

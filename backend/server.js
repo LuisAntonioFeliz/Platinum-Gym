@@ -1,22 +1,28 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import prisma from './config/database.js'; // Importamos tu instancia configurada
 
 dotenv.config();
 
+import prisma from './config/database.js';
+
 const app = express();
 
+// Configuración robusta de CORS para desarrollo local
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
+    optionsSuccessStatus: 200
 }));
+
 app.use(express.json());
 
 // Ruta de prueba
 app.get('/', (req, res) => {
-    res.json({ message: 'API de Platinum Gym conectada a MySQL con Prisma' });
+    res.json({ message: 'API de Platinum Gym conectada a PostgreSQL con Prisma' });
 });
 
 // Rutas de tu gimnasio
@@ -39,9 +45,9 @@ app.get('/api/plans', async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-    const { name, sex, address, phone, email, branchId, planId } = req.body;
-
     try {
+        const { name, sex, address, phone, email, branchId, planId } = req.body;
+
         const newUser = await prisma.user.create({
             data: {
                 name,
@@ -53,14 +59,30 @@ app.post('/api/register', async (req, res) => {
                 planId: Number(planId)
             }
         });
-        res.status(201).json({ message: 'Inscripción exitosa', user: newUser });
+
+        return res.status(201).json({ success: true, user: newUser });
     } catch (error) {
-        console.error(error);
-        res.status(400).json({ error: 'No se pudo completar el registro' });
+        console.error("Error en el registro:", error);
+
+        // Si el correo ya existe (código P2002 de Prisma)
+        if (error.code === 'P2002') {
+            return res.status(400).json({
+                success: false,
+                message: 'Este correo electrónico ya se encuentra registrado.'
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: 'Hubo un error al procesar la inscripción.'
+        });
     }
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, 'localhost', () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+setInterval(() => { }, 1000);

@@ -1,63 +1,77 @@
+const testimonios = [
+    {
+        imagen: "/Imagenes/Testimonio 1.jpg",
+        cita: "Platinum Gym cambió mi vida, ahora entreno con disciplina.",
+        autor: "Iván Martínez",
+    },
+    {
+        imagen: "/Imagenes/Testimonio 2.jpg",
+        cita: "Los entrenadores son increíbles y el ambiente me motiva cada día.",
+        autor: "Natalia Bautista",
+    },
+    {
+        imagen: "/Imagenes/Testimonio 3.jpg",
+        cita: "El plan premium vale cada peso, me siento más fuerte y saludable.",
+        autor: "Carlos Rodríguez",
+    },
+];
+
 function Testimonios() {
     return (
-        // Contenedor principal con ancho máximo y padding lateral fluido
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 my-10">
-            <h2
-                id="testimonios-titulo"
-                className="mt-4 mb-8 text-center text-2xl sm:text-[28px] font-semibold text-azul scroll-mt-[90px]"
-            >
-                Testimonios
-            </h2>
-            <section
-                id="testimonios"
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center"
-            >
-                <figure className="w-full max-w-[340px] rounded-lg border-2 border-azul bg-white p-6 text-center shadow-sm flex flex-col items-center">
-                    <img
-                        src="/Imagenes/Testimonio 1.jpg"
-                        alt="Cliente satisfecho entrenando en Platinum Gym"
-                        className="mb-4 h-64 w-full object-cover rounded-lg"
-                    />
-                    <figcaption className="text-sm sm:text-[16px] font-normal text-black mt-auto">
-                        "Platinum Gym cambió mi vida, ahora entreno con disciplina."
-                        <br />
-                        <strong className="block mt-2 font-semibold">
-                            - Iván Martínez
-                        </strong>
-                    </figcaption>
-                </figure>
+        <section
+            id="testimonios"
+            aria-labelledby="testimonios-titulo"
+            className="bg-black text-white"
+        >
+            <div className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 md:py-28">
+                <header className="max-w-[640px]">
+                    <h2
+                        id="testimonios-titulo"
+                        className="scroll-mt-32 text-[clamp(2.25rem,5vw,3.125rem)] font-normal leading-[0.95] tracking-[-0.04em] [text-wrap:balance]"
+                    >
+                        Testimonios
+                    </h2>
+                    <p className="mt-6 max-w-[520px] text-[19px] leading-[1.35] tracking-[-0.03em] text-[#999999]">
+                        Lo que dicen quienes entrenan en Platinum Gym.
+                    </p>
+                </header>
 
-                <figure className="w-full max-w-[340px] rounded-lg border-2 border-azul bg-white p-6 text-center shadow-sm flex flex-col items-center">
-                    <img
-                        src="/Imagenes/Testimonio 2.jpg"
-                        alt="Cliente satisfecho entrenando en Platinum Gym"
-                        className="mb-4 h-64 w-full object-cover rounded-lg"
-                    />
-                    <figcaption className="text-sm sm:text-[16px] font-normal text-black mt-auto">
-                        "Los entrenadores son increíbles y el ambiente me motiva cada día."
-                        <br />
-                        <strong className="block mt-2 font-semibold">
-                            - Natalia Bautista
-                        </strong>
-                    </figcaption>
-                </figure>
-
-                <figure className="w-full max-w-[340px] rounded-lg border-2 border-azul bg-white p-6 text-center shadow-sm flex flex-col items-center sm:col-span-2 lg:col-span-1">
-                    <img
-                        src="/Imagenes/Testimonio 3.jpg"
-                        alt="Cliente satisfecho entrenando en Platinum Gym"
-                        className="mb-4 h-64 w-full object-cover rounded-lg"
-                    />
-                    <figcaption className="text-sm sm:text-[16px] font-normal text-black mt-auto">
-                        "El plan premium vale cada peso, me siento más fuerte y saludable."
-                        <br />
-                        <strong className="block mt-2 font-semibold">
-                            - Carlos Rodríguez
-                        </strong>
-                    </figcaption>
-                </figure>
-            </section>
-        </div>
+                {/* Carrusel con scroll-snap en móvil; cuadrícula de 3 columnas desde md */}
+                <div
+                    role="region"
+                    aria-label="Testimonios de socios"
+                    tabIndex={0}
+                    className="-mx-5 mt-12 overflow-x-auto px-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:-mx-8 sm:px-8 md:mx-0 md:mt-16 md:overflow-visible md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                    <ul className="m-0 flex list-none snap-x snap-mandatory gap-4 p-0 md:grid md:grid-cols-3 md:gap-6">
+                        {testimonios.map((item) => (
+                            <li
+                                key={item.autor}
+                                className="w-[78%] shrink-0 snap-start sm:w-[46%] md:w-auto"
+                            >
+                                <figure className="relative m-0 flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-3xl bg-[#191919]">
+                                    <img
+                                        src={item.imagen}
+                                        alt="Cliente satisfecho entrenando en Platinum Gym"
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                    <div className="relative bg-gradient-to-t from-black/85 via-black/55 to-transparent p-6 pt-28">
+                                        <blockquote className="m-0">
+                                            <p className="m-0 text-[20px] font-medium leading-[1.25] tracking-[-0.03em] text-white">
+                                                “{item.cita}”
+                                            </p>
+                                        </blockquote>
+                                        <figcaption className="mt-4 text-[14px] font-medium uppercase tracking-[0.1em] text-white/80">
+                                            {item.autor}
+                                        </figcaption>
+                                    </div>
+                                </figure>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        </section>
     );
 }
 

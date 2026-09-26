@@ -1,6 +1,46 @@
 import React, { useState } from "react";
 //import { registrarCliente } from "../../services/clientes";
 
+// --- Estilos (solo presentación) ---
+const inputClass =
+  "h-12 w-full rounded-full border border-[#808080] bg-white px-5 text-[16px] text-black placeholder:text-[#767676] transition-colors duration-200 focus:border-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-azul";
+const labelClass =
+  "text-[14px] font-medium uppercase tracking-[0.1em] text-black";
+const asteriskClass = "ml-0.5 text-rojo";
+
+// Definidos fuera del componente para que los inputs no se remonten en cada render
+const Campo = ({ id, etiqueta, className = "", children }) => (
+  <div className={`flex flex-col gap-2 ${className}`}>
+    <label htmlFor={id} className={labelClass}>
+      {etiqueta}
+      <span className={asteriskClass} aria-hidden="true">
+        *
+      </span>
+    </label>
+    {children}
+  </div>
+);
+
+const SelectPildora = ({ children, ...props }) => (
+  <div className="relative">
+    <select {...props} className={`${inputClass} appearance-none pr-12`}>
+      {children}
+    </select>
+    <svg
+      viewBox="0 0 20 20"
+      className="pointer-events-none absolute right-5 top-1/2 h-5 w-5 -translate-y-1/2 text-black"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 8l5 5 5-5" />
+    </svg>
+  </div>
+);
+
 const FormInscripcion = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -46,6 +86,67 @@ const FormInscripcion = () => {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMensajeEstado({ tipo: "", texto: "" }); // Limpiar mensajes previos
+    setCargando(true);
+
+    // 1. Validar que no haya campos vacíos
+    const { name, sex, address, phone, email, branchId, planId } = formData;
+    if (!name || !sex || !address || !phone || !email || !branchId || !planId) {
+      setMensajeEstado({
+        tipo: "error",
+        texto: "Por favor, completa todos los campos obligatorios.",
+      });
+      setCargando(false);
+      return; // Detiene la ejecución
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "No se pudo completar el registro");
+      }
+
+      // 2. Si la inscripción es exitosa
+      setMensajeEstado({
+        tipo: "success",
+        texto: "¡Inscripción exitosa!",
+      });
+
+      // 3. Limpiar los campos del formulario
+      setFormData({
+        name: "",
+        sex: "",
+        address: "",
+        phone: "",
+        email: "",
+        branchId: "",
+        planId: "",
+      });
+
+      // 4. Hacer que el mensaje desaparezca automáticamente después de 5 segundos
+      setTimeout(() => {
+        setMensajeEstado({ tipo: "", texto: "" });
+      }, 5000);
+    } catch (error) {
+      // Muestra errores del servidor (como correo duplicado)
+      setMensajeEstado({
+        tipo: "error",
+        texto: error.message,
+      });
+    } finally {
+      setCargando(false);
+    }
+  };
+
   /*const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
@@ -70,69 +171,8 @@ const FormInscripcion = () => {
     }
 
     try {
-      const resultado = await registrarCliente({
-        ...formData,
-        branchId: Number(formData.branchId),
-        planId: Number(formData.planId),
-      });
-
-      setCargando(false);
-      setMensajeEstado({
-        tipo: "success",
-        texto: resultado.message || "¡Inscripción realizada con éxito!",
-      });
-
-      setFormData({
-        name: "",
-        sex: "",
-        address: "",
-        phone: "",
-        email: "",
-        branchId: "",
-        planId: "",
-      });
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error) {
-      setCargando(false);
-      setMensajeEstado({
-        tipo: "error",
-        texto:
-          error.response?.data?.error || "Ocurrió un error en el registro.",
-      });
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };*/
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setCargando(true);
-    setMensajeEstado({ tipo: "", texto: "" });
-
-    if (
-      !formData.name ||
-      !formData.sex ||
-      !formData.address ||
-      !formData.phone ||
-      !formData.email ||
-      !formData.branchId ||
-      !formData.planId
-    ) {
-      setMensajeEstado({
-        tipo: "error",
-        texto:
-          "Por favor, complete todos los campos obligatorios marcados con *",
-      });
-      setCargando(false);
-      return;
-    }
-
-    try {
       // --- MODO SIMULACIÓN TEMPORAL ---
-      // Simulamos una pequeña espera de red (1 segundo)
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Si quieres probar tu servicio real en el futuro, aquí iría el axios.post
-      // const resultado = await registrarCliente({...});
 
       setCargando(false);
       setMensajeEstado({
@@ -149,184 +189,203 @@ const FormInscripcion = () => {
         branchId: "",
         planId: "",
       });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // Quitamos el window.scrollTo para que te quedes en la sección del formulario
+      // Opcional: Ocultar el mensaje de éxito automáticamente después de 5 segundos
+      setTimeout(() => {
+        setMensajeEstado({ tipo: "", texto: "" });
+      }, 5000);
     } catch {
       setCargando(false);
       setMensajeEstado({
         tipo: "error",
         texto: "Ocurrió un error en el registro.",
       });
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // Quitamos el window.scrollTo de aquí también si prefieres no perder el foco
     }
-  };
-
-  const inputClass =
-    "w-full border border-blue-400 rounded-md px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-600 text-zinc-700 text-sm bg-white";
-  const labelClass = "block text-sm font-medium text-zinc-800";
-  const asteriskClass = "text-red-500 ml-0.5";
+  };*/
 
   return (
-    // Se ajustó con mx-4 para pantallas pequeñas y max-w-4xl con centrado automático en pantallas grandes
-    <div
+    <section
       id="inscripcion"
-      className="max-w-4xl mx-4 sm:mx-auto p-4 sm:p-8 md:p-12 border-2 border-blue-400 rounded-2xl shadow-sm bg-white mt-10"
+      aria-labelledby="inscripcion-titulo"
+      className="scroll-mt-20 bg-black text-white"
     >
-      <form onSubmit={handleSubmit}>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 mb-3 text-center">
-          Inscríbete con nosotros
-        </h2>
-
-        <p className="text-sm text-red-500 block mb-8 text-center font-medium">
-          * Campo obligatorio
-        </p>
-
-        {mensajeEstado.texto && (
-          <div
-            className={`p-4 mb-6 rounded-lg text-sm text-center font-medium ${
-              mensajeEstado.tipo === "success"
-                ? "bg-green-50 text-green-800 border border-green-200"
-                : "bg-red-50 text-red-800 border border-red-200"
-            }`}
+      <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-20 sm:px-8 md:py-28 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+        <header>
+          <h2
+            id="inscripcion-titulo"
+            className="text-[clamp(2.25rem,5vw,3.125rem)] font-normal leading-[0.95] tracking-[-0.04em] [text-wrap:balance]"
           >
-            {mensajeEstado.texto}
-          </div>
-        )}
+            Inscríbete con nosotros
+          </h2>
+          <p className="mt-6 max-w-[520px] text-[19px] leading-[1.35] tracking-[-0.03em] text-[#999999]">
+            Completa el formulario y elige tu sucursal y tu plan.
+          </p>
+        </header>
 
-        {/* Grid adaptable a una columna en móviles y dos en tablets/PCs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {/* Nombre */}
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>
-              Nombre <span className={asteriskClass}>*</span>
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              placeholder="Nombre..."
-              className={inputClass}
-            />
-          </div>
+        <form
+          onSubmit={handleSubmit}
+          aria-labelledby="inscripcion-titulo"
+          className="rounded-3xl bg-white p-6 text-black sm:p-8 md:p-10"
+        >
+          <p className="m-0 mb-6 text-[14px] font-medium uppercase tracking-[0.1em] text-black/60">
+            <span className="text-rojo" aria-hidden="true">
+              *
+            </span>{" "}
+            Campo obligatorio
+          </p>
 
-          {/* Sexo */}
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>
-              Sexo <span className={asteriskClass}>*</span>
-            </label>
-            <select
-              name="sex"
-              value={formData.sex}
-              onChange={handleChange}
-              required
-              className={inputClass}
+          {mensajeEstado.texto && (
+            <div
+              role={mensajeEstado.tipo === "success" ? "status" : "alert"}
+              className={`mb-6 flex items-start gap-3 rounded-2xl p-4 text-[16px] leading-[1.4] ${
+                mensajeEstado.tipo === "success"
+                  ? "bg-black text-white"
+                  : "border border-rojo bg-white text-black"
+              }`}
             >
-              <option value="">-- Seleccione sexo --</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Femenino">Femenino</option>
-            </select>
-          </div>
+              <svg
+                viewBox="0 0 20 20"
+                className={`mt-0.5 h-5 w-5 shrink-0 ${
+                  mensajeEstado.tipo === "success" ? "" : "text-rojo"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                {mensajeEstado.tipo === "success" ? (
+                  <path d="M4 10.5l4 4 8-9" />
+                ) : (
+                  <path d="M10 5v6M10 14.5v.5" />
+                )}
+              </svg>
+              <span>{mensajeEstado.texto}</span>
+            </div>
+          )}
 
-          {/* Dirección */}
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>
-              Dirección <span className={asteriskClass}>*</span>
-            </label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-              placeholder="Dirección..."
-              className={inputClass}
-            />
-          </div>
+          {/* Una columna en móviles, dos desde sm */}
+          <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+            <Campo id="inscripcion-name" etiqueta="Nombre">
+              <input
+                id="inscripcion-name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                autoComplete="name"
+                placeholder="Nombre..."
+                className={inputClass}
+              />
+            </Campo>
 
-          {/* Teléfono */}
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>
-              Teléfono <span className={asteriskClass}>*</span>
-            </label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-              placeholder="(809) 000-0000"
-              maxLength={14}
-              className={inputClass}
-            />
-          </div>
+            <Campo id="inscripcion-sex" etiqueta="Sexo">
+              <SelectPildora
+                id="inscripcion-sex"
+                name="sex"
+                value={formData.sex}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Seleccione sexo --</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </SelectPildora>
+            </Campo>
 
-          {/* E-mail */}
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>
-              E-mail <span className={asteriskClass}>*</span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="ejemplo@correo.com"
-              className={inputClass}
-            />
-          </div>
+            <Campo id="inscripcion-address" etiqueta="Dirección">
+              <input
+                id="inscripcion-address"
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                required
+                autoComplete="street-address"
+                placeholder="Dirección..."
+                className={inputClass}
+              />
+            </Campo>
 
-          {/* Sucursal */}
-          <div className="flex flex-col gap-1.5">
-            <label className={labelClass}>
-              Sucursal <span className={asteriskClass}>*</span>
-            </label>
-            <select
-              name="branchId"
-              value={formData.branchId}
-              onChange={handleChange}
-              required
-              className={inputClass}
+            <Campo id="inscripcion-phone" etiqueta="Teléfono">
+              <input
+                id="inscripcion-phone"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                autoComplete="tel"
+                placeholder="(809) 000-0000"
+                maxLength={14}
+                className={inputClass}
+              />
+            </Campo>
+
+            <Campo id="inscripcion-email" etiqueta="E-mail">
+              <input
+                id="inscripcion-email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                autoComplete="email"
+                placeholder="ejemplo@correo.com"
+                className={inputClass}
+              />
+            </Campo>
+
+            <Campo id="inscripcion-branch" etiqueta="Sucursal">
+              <SelectPildora
+                id="inscripcion-branch"
+                name="branchId"
+                value={formData.branchId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Seleccione la sucursal --</option>
+                <option value="1">Bonao</option>
+                <option value="2">Santo Domingo</option>
+                <option value="3">Santiago</option>
+              </SelectPildora>
+            </Campo>
+
+            <Campo
+              id="inscripcion-plan"
+              etiqueta="Plan"
+              className="sm:col-span-2"
             >
-              <option value="">-- Seleccione la sucursal --</option>
-              <option value="1">Bonao</option>
-              <option value="2">Santo Domingo</option>
-              <option value="3">Santiago</option>
-            </select>
+              <SelectPildora
+                id="inscripcion-plan"
+                name="planId"
+                value={formData.planId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Seleccione el plan --</option>
+                <option value="1">Plan Básico</option>
+                <option value="2">Plan Premium</option>
+              </SelectPildora>
+            </Campo>
           </div>
 
-          {/* Plan (Ocupa ambas columnas en pantallas medianas, fluido en móviles) */}
-          <div className="flex flex-col gap-1.5 md:col-span-2 w-full">
-            <label className={labelClass}>
-              Plan <span className={asteriskClass}>*</span>
-            </label>
-            <select
-              name="planId"
-              value={formData.planId}
-              onChange={handleChange}
-              required
-              className={inputClass}
+          <div className="mt-10 flex">
+            <button
+              type="submit"
+              disabled={cargando}
+              className="inline-flex w-full items-center justify-center rounded-full bg-azul px-10 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white transition-colors duration-200 hover:bg-[#1c54b2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-azul disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
-              <option value="">-- Seleccione el plan --</option>
-              <option value="1">Plan Básico</option>
-              <option value="2">Plan Premium</option>
-            </select>
+              {cargando ? "Procesando..." : "Inscríbete"}
+            </button>
           </div>
-        </div>
-
-        {/* Botón responsivo con ancho completo en móviles y ancho automático centrado en pantallas grandes */}
-        <div className="mt-10 flex justify-center">
-          <button
-            type="submit"
-            disabled={cargando}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-16 rounded-xl transition duration-200 disabled:opacity-50 text-lg shadow-md"
-          >
-            {cargando ? "Procesando..." : "Inscríbete"}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </section>
   );
 };
 
